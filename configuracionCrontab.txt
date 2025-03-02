@@ -1,0 +1,3 @@
+#* * * * * /home/franklin-noj/Escritorio/Proyectos_SO_202200089/contenedores.sh >> /home/franklin-noj/Escritorio/Proyectos_SO_2>
+
+
