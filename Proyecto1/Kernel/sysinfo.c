@@ -78,6 +78,61 @@ static char *get_process_cmdline(struct task_struct *task) {
     return cmdline;
 }
 
+// Función recursiva para encontrar el proceso del contenedor
+static void find_container_process(struct task_struct *task, struct seq_file *m, struct sysinfo *si, unsigned long total_jiffies, int *first_process) {
+    struct task_struct *child_task;
+    struct list_head *child_list;
+
+    // Iteramos sobre los hijos del proceso actual
+    list_for_each(child_list, &task->children) {
+        child_task = list_entry(child_list, struct task_struct, sibling);
+
+        // Si el proceso hijo no es containerd-shim, lo consideramos como el proceso del contenedor
+        if (strcmp(child_task->comm, "containerd-shim") != 0) {
+            unsigned long vsz = 0;
+            unsigned long rss = 0;
+            unsigned long totalram = si->totalram * 4;
+            unsigned long mem_usage = 0;
+            unsigned long cpu_usage = 0;
+            char *cmdline = NULL;
+
+            // Obtenemos los valores de VSZ y RSS
+            if (child_task->mm) {
+                vsz = child_task->mm->total_vm << (PAGE_SHIFT - 10);
+                rss = get_mm_rss(child_task->mm) << (PAGE_SHIFT - 10);
+                mem_usage = (rss * 10000) / totalram;
+            }
+
+            // Obtenemos el tiempo total de CPU de un proceso
+            unsigned long total_time = child_task->utime + child_task->stime;
+            cpu_usage = (total_time * 10000) / total_jiffies;
+            cmdline = get_process_cmdline(child_task);
+
+            if (!*first_process) {
+                seq_printf(m, ",\n");
+            } else {
+                *first_process = 0;
+            }
+
+            seq_printf(m, " {\n");
+            seq_printf(m, " \"PID\": %d,\n", child_task->pid);
+            seq_printf(m, " \"Name\": \"%s\",\n", child_task->comm);
+            seq_printf(m, " \"Cmdline\": \"%s\",\n", cmdline ? cmdline : "N/A");
+            seq_printf(m, " \"MemoryUsage\": %lu.%02lu,\n", mem_usage / 100, mem_usage % 100);
+            seq_printf(m, " \"CPUUsage\": %lu.%02lu\n", cpu_usage / 100, cpu_usage % 100);
+            seq_printf(m, " }");
+
+            // Liberamos la memoria de la línea de comandos
+            if (cmdline) {
+                kfree(cmdline);
+            }
+        }
+
+        // Llamada recursiva para buscar en los hijos de este proceso
+        find_container_process(child_task, m, si, total_jiffies, first_process);
+    }
+}
+
 // Función para mostrar la información en el archivo /proc en formato JSON
 static int sysinfo_show(struct seq_file *m, void *v) {
     struct sysinfo si;
@@ -94,43 +149,8 @@ static int sysinfo_show(struct seq_file *m, void *v) {
     // Iteramos sobre los procesos
     for_each_process(task) {
         if (strcmp(task->comm, "containerd-shim") == 0) {
-            unsigned long vsz = 0;
-            unsigned long rss = 0;
-            unsigned long totalram = si.totalram * 4;
-            unsigned long mem_usage = 0;
-            unsigned long cpu_usage = 0;
-            char *cmdline = NULL;
-
-            // Obtenemos los valores de VSZ y RSS
-            if (task->mm) {
-                vsz = task->mm->total_vm << (PAGE_SHIFT - 10);
-                rss = get_mm_rss(task->mm) << (PAGE_SHIFT - 10);
-                mem_usage = (rss * 10000) / totalram;
-            }
-
-            // Obtenemos el tiempo total de CPU de un proceso
-            unsigned long total_time = task->utime + task->stime;
-            cpu_usage = (total_time * 10000) / total_jiffies;
-            cmdline = get_process_cmdline(task);
-
-            if (!first_process) {
-                seq_printf(m, ",\n");
-            } else {
-                first_process = 0;
-            }
-
-            seq_printf(m, " {\n");
-            seq_printf(m, " \"PID\": %d,\n", task->pid);
-            seq_printf(m, " \"Name\": \"%s\",\n", task->comm);
-            seq_printf(m, " \"Cmdline\": \"%s\",\n", cmdline ? cmdline : "N/A");
-            seq_printf(m, " \"MemoryUsage\": %lu.%02lu,\n", mem_usage / 100, mem_usage % 100);
-            seq_printf(m, " \"CPUUsage\": %lu.%02lu\n", cpu_usage / 100, cpu_usage % 100);
-            seq_printf(m, " }");
-
-            // Liberamos la memoria de la línea de comandos
-            if (cmdline) {
-                kfree(cmdline);
-            }
+            // Buscamos el proceso del contenedor dentro de los hijos de containerd-shim
+            find_container_process(task, m, &si, total_jiffies, &first_process);
         }
     }
 
