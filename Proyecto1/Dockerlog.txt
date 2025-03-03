@@ -1,0 +1,93 @@
+974d991b052293129b7c956269ffc141c4ec6723e313271eda8226d6c855cb12
+Contenedor CwBzar6hXJ creado y programado para eliminarse en 30 segundos.
+6d3e24c32e39b4a83b24a89909232f08ae8de40bc9acd042c15de4710a174e73
+Contenedor V94jzyekBJ creado y programado para eliminarse en 30 segundos.
+2f97e77395d75821eb3abf30b7473f24be2b4e38ccd55d764f9e0103974f981d
+Contenedor 6vzYJjgk2c creado y programado para eliminarse en 30 segundos.
+7a36f1f2008d5dea59d19df0d22e50ccb95bcb92eb7e5f06165de3c06f3b660a
+Contenedor vr3xn2u85a creado y programado para eliminarse en 30 segundos.
+134dd2da82793f6f49f19c96e2bec2510420b62a0b01338024667317a05a5ad2
+Contenedor E4Kc8B0tMn creado y programado para eliminarse en 30 segundos.
+9c232f1c857997bb6c19245982aa4ff23bd38cf08cd0a3cc47275628116c52ee
+Contenedor Vcnn46vwlm creado y programado para eliminarse en 30 segundos.
+1a2e6f1a686ad69f908f005c3a9d3cb399a939eb99d3be3028521c1fb04baba4
+Contenedor bZnhxS4Xmv creado y programado para eliminarse en 30 segundos.
+17c5e979e3c4e6a021c71656f606515f3c653f92c7ec84959d4ef96ed419f101
+Contenedor oCFnEQuWSX creado y programado para eliminarse en 30 segundos.
+ea10a8f8d7f20f9df8bc7ba7601a7317da9efb9abd366ba2b6ba37e8c13315f9
+85ea1a04d11f5afbb52708b8040f5ab54df2e1aa6f0bff44eb1313e719cdb803
+vr3xn2u85a
+V94jzyekBJ
+Contenedor knbICVUJTz creado y programado para eliminarse en 30 segundos.
+6vzYJjgk2c
+CwBzar6hXJ
+57ac22478f98b3833ceaf6c1aaf9428d95dd0e62b275062b510beb2c09051c2e
+E4Kc8B0tMn
+Contenedor KIKi8gat2I creado y programado para eliminarse en 30 segundos.
+Contenedor AA29MWJN49 creado y programado para eliminarse en 30 segundos.
+/home/franklin-noj/Escritorio/Proyectos_SO_202200089/Proyecto1/Docker/contenedores.sh: línea 30: /home/franklin-noj/Documentos/Universidad/7mo_Semestre/Sopes1/Lab/Proyectos_SO_202200089/Proyecto1/log.txt: No existe el archivo o el directorio
+b6ad2cdbc9ffc1ee72d58925c89ea700348e516cf0dfa923424dbc8ed3675670
+Contenedor Hhw9EiKCxF creado y programado para eliminarse en 30 segundos.
+Vcnn46vwlm
+9872bc3236f9b8f79017933ed4f64e25b26f5f137c8b9e98d56f8221fe1481b9
+Contenedor 2Gu0CYunAz creado y programado para eliminarse en 30 segundos.
+2407950a745dca467b5032f7fc355a92c26f799629793c8602419de43432edef
+Contenedor jfJkMbZNsX creado y programado para eliminarse en 30 segundos.
+246cd0fce835bd482533ada9e4c7230c813f63b46e8d04f248a2d721a8d33024
+Contenedor OhFRHtAgvr creado y programado para eliminarse en 30 segundos.
+bZnhxS4Xmv
+d55d28f947f6139a95b5bcc80e62c26203d86eb4261083420075c0edc22a2030
+Contenedor C9DQuy3JOk creado y programado para eliminarse en 30 segundos.
+oCFnEQuWSX
+e530fc592da77a8a12e6cf5b2eafce3d29d29d1eccacfc3fd99fd36c51493331
+a60acd7f24a35f5e8f94e6cf6c2db56346d842da8fbf8968addc8bd82c954934
+Contenedor IyonJFTZdZ creado y programado para eliminarse en 30 segundos.
+Contenedor wVEQ1vc5MM creado y programado para eliminarse en 30 segundos.
+24d26fa41ed1d2dd280dad4ab34be09a85cc71d7cf5c75ac9e977fd3b940d711
+831aa3b061845737401125fdbc8758995cc81eeef262355892d7baed6aa2a79e
+Error response from daemon: cannot remove container "/KIKi8gat2I": could not kill: tried to kill container, but did not receive an exit event
+AA29MWJN49
+knbICVUJTz
+Hhw9EiKCxF
+2Gu0CYunAz
+Contenedor YWSlwHvduP creado y programado para eliminarse en 30 segundos.
+jfJkMbZNsX
+Contenedor Msh4UD3QEz creado y programado para eliminarse en 30 segundos.
+f35b4261307130a5de3439c0bf743920c70c4f2227b124f069010fec3ed43bb0
+f301a5ed6cf42dce26816df11990ebc5e4418f643deaf6bcb030b6bae703e4be
+Contenedor lGfOHghC4E creado y programado para eliminarse en 30 segundos.
+Contenedor A9bzAHcsFC creado y programado para eliminarse en 30 segundos.
+OhFRHtAgvr
+5527f82c6c31e2a051fa7114cdd5fcba62e7efafeca57238772cf11e9c432bd1
+41ce955d1c2af800d9214d4a855c461c06f6aae0e76ffb9be64ac1e7c1562c62
+C9DQuy3JOk
+Contenedor 0uQpOG83mO creado y programado para eliminarse en 30 segundos.
+Contenedor 0lmyWSmM0X creado y programado para eliminarse en 30 segundos.
+/home/franklin-noj/Escritorio/Proyectos_SO_202200089/Proyecto1/Docker/contenedores.sh: línea 30: /home/franklin-noj/Documentos/Universidad/7mo_Semestre/Sopes1/Lab/Proyectos_SO_202200089/Proyecto1/log.txt: No existe el archivo o el directorio
+6abf5dd4e758888b5e7661a611db2234625ba75b609b793c7321514dab17e87a
+IyonJFTZdZ
+Contenedor Idrgft9OeT creado y programado para eliminarse en 30 segundos.
+edc6e948089744c175c11ff0338f144736ce432a808f5a949d15a2f78457a944
+wVEQ1vc5MM
+Contenedor ZaIkjsThrX creado y programado para eliminarse en 30 segundos.
+91a2fa36dd888b1b7c37eadd6073987f8df479a06e40d981fa0e9d4f602193be
+Contenedor jjnV6wH3aT creado y programado para eliminarse en 30 segundos.
+46183e10fdc6ae99ad78f1d3fbb8c78dcac3c38203795ebe9b65391ab524688f
+Contenedor 7iq9dtntCq creado y programado para eliminarse en 30 segundos.
+9338c638d11dc2e85b4c79105a4693afb326159fcdcda1b8ebe70fc31c834724
+Contenedor a7CazEFue5 creado y programado para eliminarse en 30 segundos.
+716821ddd6aea5e1cd48c92106624eed77463d754057714127d4b9e93604caa8
+Contenedor SQGroVA6Yc creado y programado para eliminarse en 30 segundos.
+/home/franklin-noj/Escritorio/Proyectos_SO_202200089/Proyecto1/Docker/contenedores.sh: línea 30: /home/franklin-noj/Documentos/Universidad/7mo_Semestre/Sopes1/Lab/Proyectos_SO_202200089/Proyecto1/log.txt: No existe el archivo o el directorio
+YWSlwHvduP
+Msh4UD3QEz
+A9bzAHcsFC
+lGfOHghC4E
+0uQpOG83mO
+0lmyWSmM0X
+Idrgft9OeT
+ZaIkjsThrX
+jjnV6wH3aT
+7iq9dtntCq
+a7CazEFue5
+SQGroVA6Yc
