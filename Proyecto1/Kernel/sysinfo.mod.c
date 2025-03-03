@@ -35,8 +35,8 @@ MODULE_INFO(retpoline, "Y");
 
 static const char ____versions[]
 __used __section("__versions") =
-	"\x14\x00\x00\x00\xb7\x6f\x70\xe6"
-	"single_open\0"
+	"\x1c\x00\x00\x00\x27\x56\xb6\x2a"
+	"remove_proc_entry\0\0\0"
 	"\x10\x00\x00\x00\x5a\x25\xd5\xe2"
 	"strcmp\0\0"
 	"\x1c\x00\x00\x00\x63\xa5\x03\x4c"
@@ -71,18 +71,18 @@ __used __section("__versions") =
 	"init_task\0\0\0"
 	"\x1c\x00\x00\x00\xcb\xf6\xfd\xf0"
 	"__stack_chk_fail\0\0\0\0"
-	"\x1c\x00\x00\x00\x27\x56\xb6\x2a"
-	"remove_proc_entry\0\0\0"
 	"\x14\x00\x00\x00\x0e\xd8\xd5\xd9"
 	"seq_read\0\0\0\0"
 	"\x14\x00\x00\x00\xbb\x6d\xfb\xbd"
 	"__fentry__\0\0"
+	"\x1c\x00\x00\x00\xca\x39\x82\x5b"
+	"__x86_return_thunk\0\0"
 	"\x14\x00\x00\x00\x2b\x3a\x21\x7f"
 	"proc_create\0"
 	"\x10\x00\x00\x00\x7e\x3a\x2c\x12"
 	"_printk\0"
-	"\x1c\x00\x00\x00\xca\x39\x82\x5b"
-	"__x86_return_thunk\0\0"
+	"\x14\x00\x00\x00\xb7\x6f\x70\xe6"
+	"single_open\0"
 	"\x18\x00\x00\x00\xde\x9f\x8a\x25"
 	"module_layout\0\0\0"
 	"\x00\x00\x00\x00\x00\x00\x00\x00";
@@ -90,4 +90,4 @@ __used __section("__versions") =
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "79D6B9DECA15C5473D0CCA4");
+MODULE_INFO(srcversion, "B5C5122B8C91C0C03B32B07");
