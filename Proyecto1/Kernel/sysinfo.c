@@ -16,6 +16,9 @@
 #include <linux/sched/mm.h>
 #include <linux/binfmts.h>
 #include <linux/timekeeping.h>
+#include <linux/cpumask.h>
+#include <linux/cpu.h>
+#include <linux/kernel_stat.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Franklin");
@@ -76,6 +79,33 @@ static char *get_process_cmdline(struct task_struct *task) {
     // Liberamos la estructura mm_struct
     mmput(mm);
     return cmdline;
+}
+
+// Función para calcular el uso de CPU
+static unsigned long get_cpu_usage(void) {
+    unsigned long user, nice, system, idle, iowait, irq, softirq, steal;
+    unsigned long total_time, idle_time, cpu_usage;
+    struct kernel_cpustat cpu_stat;
+
+    // Obtenemos las estadísticas de CPU
+    cpu_stat = kcpustat_cpu(0);
+    user = cpu_stat.cpustat[CPUTIME_USER];
+    nice = cpu_stat.cpustat[CPUTIME_NICE];
+    system = cpu_stat.cpustat[CPUTIME_SYSTEM];
+    idle = cpu_stat.cpustat[CPUTIME_IDLE];
+    iowait = cpu_stat.cpustat[CPUTIME_IOWAIT];
+    irq = cpu_stat.cpustat[CPUTIME_IRQ];
+    softirq = cpu_stat.cpustat[CPUTIME_SOFTIRQ];
+    steal = cpu_stat.cpustat[CPUTIME_STEAL];
+
+    // Calculamos el tiempo total de CPU
+    total_time = user + nice + system + idle + iowait + irq + softirq + steal;
+    idle_time = idle + iowait;
+
+    // Calculamos el uso de CPU
+    cpu_usage = 100 - ((idle_time * 100) / total_time);
+
+    return cpu_usage;
 }
 
 // Función recursiva para encontrar el proceso del contenedor
@@ -143,7 +173,21 @@ static int sysinfo_show(struct seq_file *m, void *v) {
     // Obtenemos la información de memoria
     si_meminfo(&si);
 
+    // Convertimos la memoria de páginas a KB
+    unsigned long total_mem_kb = (si.totalram * si.mem_unit) / 1024;
+    unsigned long free_mem_kb = (si.freeram * si.mem_unit) / 1024;
+    unsigned long used_mem_kb = total_mem_kb - free_mem_kb;
+
+    // Obtenemos el uso de CPU
+    unsigned long cpu_usage = get_cpu_usage();
+
     seq_printf(m, "{\n");
+    seq_printf(m, "\"SystemInfo\": {\n");
+    seq_printf(m, "\"TotalMemoryKB\": %lu,\n", total_mem_kb);
+    seq_printf(m, "\"FreeMemoryKB\": %lu,\n", free_mem_kb);
+    seq_printf(m, "\"UsedMemoryKB\": %lu,\n", used_mem_kb);
+    seq_printf(m, "\"CPUUsage\": %lu\n", cpu_usage);
+    seq_printf(m, "},\n");
     seq_printf(m, "\"Processes\": [\n");
 
     // Iteramos sobre los procesos
