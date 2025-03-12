@@ -246,8 +246,12 @@ static int sysinfo_show(struct seq_file *m, void *v) {
     seq_printf(m, "    \"TotalRAM_MB\": %lu,\n", total_ram_mb);
     seq_printf(m, "    \"FreeRAM_MB\": %lu,\n", free_ram_mb);
     seq_printf(m, "    \"UsedRAM_MB\": %lu,\n", used_ram_mb);
-    seq_printf(m, "    \"TotalCPUUsagePercent\": %lu.%02lu\n", 
-               total_cpu_percent / 100, total_cpu_percent % 100);
+    char cpu_usage_str[16];  // Buffer para almacenar el texto del porcentaje
+        snprintf(cpu_usage_str, sizeof(cpu_usage_str), "%lu.%02lu", 
+                total_cpu_percent / 100, total_cpu_percent % 100);
+
+        seq_printf(m, "    \"TotalCPUUsagePercent\": \"%s\"\n", cpu_usage_str);
+
     seq_printf(m, "  },\n");
     seq_printf(m, "  \"Containers\": [\n");
 

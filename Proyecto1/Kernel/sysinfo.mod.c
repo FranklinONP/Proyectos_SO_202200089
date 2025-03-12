@@ -51,6 +51,8 @@ __used __section("__versions") =
 	"init_task\0\0\0"
 	"\x14\x00\x00\x00\x69\xb6\x98\xa4"
 	"seq_printf\0\0"
+	"\x14\x00\x00\x00\x6e\x4a\x6e\x65"
+	"snprintf\0\0\0\0"
 	"\x10\x00\x00\x00\x5a\x25\xd5\xe2"
 	"strcmp\0\0"
 	"\x1c\x00\x00\x00\x63\xa5\x03\x4c"
@@ -104,4 +106,4 @@ __used __section("__versions") =
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "CA5871C0B6B04A635137E67");
+MODULE_INFO(srcversion, "B7B0259B60BC70C8DF4B0FC");

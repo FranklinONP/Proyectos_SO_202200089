@@ -23,3 +23,17 @@ cat /proc/sysinfo
 
 Borrar todos los contenedores 
 docker rm -f $(docker ps -aq)
+
+
+saber consumo real...
+    ==> ps -eo pid,ppid,rss,comm | grep containerd-shim
+
+
+
+
+
+rust
+
+cargo build
+
+cargo run
