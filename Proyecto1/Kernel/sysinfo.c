@@ -6,6 +6,7 @@
 #include <linux/seq_file.h>
 #include <linux/mm.h>
 #include <linux/sched.h>
+#include <linux/sched/task.h>
 #include <linux/timer.h>
 #include <linux/jiffies.h>
 #include <linux/uaccess.h>
@@ -16,26 +17,103 @@
 #include <linux/sched/mm.h>
 #include <linux/binfmts.h>
 #include <linux/timekeeping.h>
-#include <linux/cpumask.h>
-#include <linux/cpu.h>
-#include <linux/kernel_stat.h>
-
-use std::process::Command;
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Franklin");
-MODULE_DESCRIPTION("Modulo para leer información de memoria y CPU en JSON");
+MODULE_AUTHOR("Tu Nombre");
+MODULE_DESCRIPTION("Modulo para leer informacion de contenedores en JSON");
 MODULE_VERSION("1.0");
 
 #define PROC_NAME "sysinfo"
 #define MAX_CMDLINE_LENGTH 256
-#define CONTAINER_ID_LENGTH 64
+#define CONTAINER_ID_LENGTH 13
 
-// Función para obtener la línea de comandos de un proceso
+static char *get_child_cmdline(struct task_struct *task) {
+    struct task_struct *child;
+    struct mm_struct *mm;
+    char *cmdline, *p;
+    unsigned long arg_start, arg_end;
+    int i, len;
+
+    cmdline = kmalloc(MAX_CMDLINE_LENGTH, GFP_KERNEL);
+    if (!cmdline)
+        return NULL;
+
+    rcu_read_lock();
+    list_for_each_entry_rcu(child, &task->children, sibling) {
+        if (child) {
+            break;
+        }
+    }
+    rcu_read_unlock();
+
+    if (!child) {
+        kfree(cmdline);
+        return NULL;
+    }
+
+    mm = get_task_mm(child);
+    if (!mm) {
+        kfree(cmdline);
+        return NULL;
+    }
+
+    down_read(&mm->mmap_lock);
+    arg_start = mm->arg_start;
+    arg_end = mm->arg_end;
+    up_read(&mm->mmap_lock);
+
+    len = min(arg_end - arg_start, (unsigned long)(MAX_CMDLINE_LENGTH - 1));
+    if (access_process_vm(child, arg_start, cmdline, len, 0) != len) {
+        mmput(mm);
+        kfree(cmdline);
+        return NULL;
+    }
+
+    cmdline[len] = '\0';
+    p = cmdline;
+    for (i = 0; i < len; i++)
+        if (p[i] == '\0')
+            p[i] = ' ';
+
+    mmput(mm);
+    return cmdline;
+}
+
+static char *extract_container_id(const char *cmdline) {
+    char *id_start, *id_end;
+    char *id = kmalloc(CONTAINER_ID_LENGTH, GFP_KERNEL);
+    int id_len;
+
+    if (!cmdline || !id)
+        return NULL;
+
+    id_start = strstr(cmdline, "-id");
+    if (!id_start)
+        goto fail;
+
+    id_start += 4;
+    while (*id_start == ' ')
+        id_start++;
+
+    id_end = id_start;
+    while (*id_end && *id_end != ' ')
+        id_end++;
+
+    id_len = min((int)(id_end - id_start), CONTAINER_ID_LENGTH - 1);
+    strncpy(id, id_start, id_len);
+    id[id_len] = '\0';
+
+    return id;
+
+fail:
+    kfree(id);
+    return NULL;
+}
+
 static char *get_process_cmdline(struct task_struct *task) {
     struct mm_struct *mm;
     char *cmdline, *p;
-    unsigned long arg_start, arg_end, env_start;
+    unsigned long arg_start, arg_end;
     int i, len;
 
     cmdline = kmalloc(MAX_CMDLINE_LENGTH, GFP_KERNEL);
@@ -51,13 +129,9 @@ static char *get_process_cmdline(struct task_struct *task) {
     down_read(&mm->mmap_lock);
     arg_start = mm->arg_start;
     arg_end = mm->arg_end;
-    env_start = mm->env_start;
     up_read(&mm->mmap_lock);
 
-    len = arg_end - arg_start;
-    if (len > MAX_CMDLINE_LENGTH - 1)
-        len = MAX_CMDLINE_LENGTH - 1;
-
+    len = min(arg_end - arg_start, (unsigned long)(MAX_CMDLINE_LENGTH - 1));
     if (access_process_vm(task, arg_start, cmdline, len, 0) != len) {
         mmput(mm);
         kfree(cmdline);
@@ -65,7 +139,6 @@ static char *get_process_cmdline(struct task_struct *task) {
     }
 
     cmdline[len] = '\0';
-
     p = cmdline;
     for (i = 0; i < len; i++)
         if (p[i] == '\0')
@@ -75,187 +148,185 @@ static char *get_process_cmdline(struct task_struct *task) {
     return cmdline;
 }
 
-// Función para calcular el uso de CPU del sistema
-static unsigned long get_cpu_usage(void) {
-    unsigned long user, nice, system, idle, iowait, irq, softirq, steal;
-    unsigned long total_time, idle_time, cpu_usage;
-    struct kernel_cpustat cpu_stat;
+static unsigned long get_process_memory_usage(struct task_struct *task) {
+    unsigned long rss = 0;
 
-    cpu_stat = kcpustat_cpu(0);
-    user = cpu_stat.cpustat[CPUTIME_USER];
-    nice = cpu_stat.cpustat[CPUTIME_NICE];
-    system = cpu_stat.cpustat[CPUTIME_SYSTEM];
-    idle = cpu_stat.cpustat[CPUTIME_IDLE];
-    iowait = cpu_stat.cpustat[CPUTIME_IOWAIT];
-    irq = cpu_stat.cpustat[CPUTIME_IRQ];
-    softirq = cpu_stat.cpustat[CPUTIME_SOFTIRQ];
-    steal = cpu_stat.cpustat[CPUTIME_STEAL];
+    if (task->mm) {
+        rss = get_mm_rss(task->mm);
+        rss = (rss * PAGE_SIZE) >> 20; // Convertir a MB
+    }
 
-    total_time = user + nice + system + idle + iowait + irq + softirq + steal;
-    idle_time = idle + iowait;
+    return rss;
+}
 
-    cpu_usage = 100 - ((idle_time * 100) / total_time);
+static unsigned long get_container_memory_usage(struct task_struct *task) {
+    struct task_struct *child;
+    unsigned long total_memory = 0;
 
-    return cpu_usage;
+    total_memory += get_process_memory_usage(task);
+
+    rcu_read_lock();
+    list_for_each_entry_rcu(child, &task->children, sibling) {
+        get_task_struct(child);
+        total_memory += get_container_memory_usage(child);
+        put_task_struct(child);
+    }
+    rcu_read_unlock();
+
+    return total_memory;
+}
+
+static unsigned long get_process_cpu_time(struct task_struct *task) {
+    return task->utime + task->stime;
+}
+
+static unsigned long get_container_cpu_time(struct task_struct *task) {
+    struct task_struct *child;
+    unsigned long total_cpu_time = 0;
+
+    total_cpu_time += get_process_cpu_time(task);
+
+    rcu_read_lock();
+    list_for_each_entry_rcu(child, &task->children, sibling) {
+        get_task_struct(child);
+        total_cpu_time += get_container_cpu_time(child);
+        put_task_struct(child);
+    }
+    rcu_read_unlock();
+
+    return total_cpu_time;
 }
 
 // Función para obtener la información de I/O de un proceso
 static void get_io_info(struct task_struct *task, unsigned long *read_bytes, unsigned long *write_bytes) {
     struct task_io_accounting io = task->ioac;
 
-    *read_bytes = io.read_bytes;
-    *write_bytes = io.write_bytes;
+    *read_bytes = io.read_bytes >> 20;  // Convertir a MB
+    *write_bytes = io.write_bytes >> 20; // Convertir a MB
 }
 
-// Función para obtener el uso de memoria de un proceso
-static unsigned long get_process_memory_usage(struct task_struct *task) {
-    unsigned long rss = 0;
+// Función para sumar el I/O de todos los procesos del contenedor
+static void get_container_io_usage(struct task_struct *task, unsigned long *total_read_bytes, unsigned long *total_write_bytes) {
+    struct task_struct *child;
+    unsigned long read_bytes = 0, write_bytes = 0;
 
-    if (task->mm) {
-        rss = get_mm_rss(task->mm) << (PAGE_SHIFT - 10); // Memoria residente en KB
+    get_io_info(task, &read_bytes, &write_bytes);
+    *total_read_bytes += read_bytes;
+    *total_write_bytes += write_bytes;
+
+    rcu_read_lock();
+    list_for_each_entry_rcu(child, &task->children, sibling) {
+        get_task_struct(child);
+        get_container_io_usage(child, total_read_bytes, total_write_bytes);
+        put_task_struct(child);
     }
-
-    return rss;
+    rcu_read_unlock();
 }
 
-// Función recursiva para sumar el uso de memoria de todos los procesos ligados al contenedor
-static unsigned long get_container_memory_usage(struct task_struct *task) {
-    struct task_struct *child_task;
-    struct list_head *child_list;
-    unsigned long total_memory = 0;
-
-    total_memory += get_process_memory_usage(task);
-
-    list_for_each(child_list, &task->children) {
-        child_task = list_entry(child_list, struct task_struct, sibling);
-        total_memory += get_container_memory_usage(child_task);
-    }
-
-    return total_memory;
-}
-
-// Función para obtener el ID del contenedor
-static char *get_container_id(struct task_struct *task) {
-    char *container_id = kmalloc(CONTAINER_ID_LENGTH, GFP_KERNEL);
-    if (!container_id)
-        return NULL;
-
-    snprintf(container_id, CONTAINER_ID_LENGTH, "%d", task->pid);
-    return container_id;
-}
-
-
-
-// Función recursiva para encontrar el proceso del contenedor
-static void find_container_process(struct task_struct *task, struct seq_file *m, struct sysinfo *si, unsigned long total_jiffies, int *first_process) {
-    struct task_struct *child_task;
-    struct list_head *child_list;
-
-    list_for_each(child_list, &task->children) {
-        child_task = list_entry(child_list, struct task_struct, sibling);
-
-        if (strcmp(child_task->comm, "containerd-shim") != 0) {
-            unsigned long memory_usage = 0;
-            unsigned long cpu_usage = 0;
-            unsigned long read_bytes = 0, write_bytes = 0;
-            char *cmdline = NULL;
-            char *container_id = get_container_id(child_task);
-
-            memory_usage = get_container_memory_usage(child_task);
-
-            unsigned long total_time = child_task->utime + child_task->stime;
-            cpu_usage = (total_time * 10000) / total_jiffies;
-
-            cmdline = get_process_cmdline(child_task);
-
-            get_io_info(child_task, &read_bytes, &write_bytes);
-
-            if (!*first_process) {
-                seq_printf(m, ",\n");
-            } else {
-                *first_process = 0;
-            }
-
-            seq_printf(m, " {\n");
-            seq_printf(m, " \"ContainerID\": \"%s\",\n", container_id ? container_id : "N/A");
-            seq_printf(m, " \"PID\": %d,\n", child_task->pid);
-            seq_printf(m, " \"Name\": \"%s\",\n", child_task->comm);
-            seq_printf(m, " \"Cmdline\": \"%s\",\n", cmdline ? cmdline : "N/A");
-            seq_printf(m, " \"MemoryUsage\": %lu,\n", memory_usage); // Memoria en KB
-            seq_printf(m, " \"CPUUsage\": %lu.%02lu,\n", cpu_usage / 100, cpu_usage % 100);
-            seq_printf(m, " \"IOReadBytes\": %lu,\n", read_bytes);
-            seq_printf(m, " \"IOWriteBytes\": %lu,\n", write_bytes);
-            seq_printf(m, " \"TotalDiskIO\": %lu\n", read_bytes + write_bytes);
-            seq_printf(m, " }");
-
-            if (cmdline) {
-                kfree(cmdline);
-            }
-            if (container_id) {
-                kfree(container_id);
-            }
-        }
-
-        find_container_process(child_task, m, si, total_jiffies, first_process);
-    }
-}
-
-// Función para mostrar la información en el archivo /proc en formato JSON
 static int sysinfo_show(struct seq_file *m, void *v) {
     struct sysinfo si;
     struct task_struct *task;
     unsigned long total_jiffies = jiffies;
     int first_process = 1;
+    unsigned long total_system_cpu_time = 0;
 
     si_meminfo(&si);
 
-    unsigned long total_mem_kb = (si.totalram * si.mem_unit) / 1024;
-    unsigned long free_mem_kb = (si.freeram * si.mem_unit) / 1024;
-    unsigned long used_mem_kb = total_mem_kb - free_mem_kb;
+    for_each_process(task) {
+        total_system_cpu_time += task->utime + task->stime;
+    }
+    unsigned long total_cpu_percent = (total_system_cpu_time * 10000) / total_jiffies;
 
-    unsigned long cpu_usage = get_cpu_usage();
+    unsigned long total_ram_mb = (si.totalram * PAGE_SIZE) >> 20;
+    unsigned long free_ram_mb = (si.freeram * PAGE_SIZE) >> 20;
+    unsigned long used_ram_mb = total_ram_mb - free_ram_mb;
 
     seq_printf(m, "{\n");
-    seq_printf(m, "\"SystemInfo\": {\n");
-    seq_printf(m, "\"TotalMemoryKB\": %lu,\n", total_mem_kb);
-    seq_printf(m, "\"FreeMemoryKB\": %lu,\n", free_mem_kb);
-    seq_printf(m, "\"UsedMemoryKB\": %lu,\n", used_mem_kb);
-    seq_printf(m, "\"CPUUsage\": %lu\n", cpu_usage);
-    seq_printf(m, "},\n");
-    seq_printf(m, "\"Processes\": [\n");
+    seq_printf(m, "  \"SystemInfo\": {\n");
+    seq_printf(m, "    \"TotalRAM_MB\": %lu,\n", total_ram_mb);
+    seq_printf(m, "    \"FreeRAM_MB\": %lu,\n", free_ram_mb);
+    seq_printf(m, "    \"UsedRAM_MB\": %lu,\n", used_ram_mb);
+    seq_printf(m, "    \"TotalCPUUsagePercent\": %lu.%02lu\n", 
+               total_cpu_percent / 100, total_cpu_percent % 100);
+    seq_printf(m, "  },\n");
+    seq_printf(m, "  \"Containers\": [\n");
 
+    rcu_read_lock();
     for_each_process(task) {
         if (strcmp(task->comm, "containerd-shim") == 0) {
-            find_container_process(task, m, &si, total_jiffies, &first_process);
+            unsigned long mem_usage_mb = 0;
+            unsigned long container_cpu_time = 0;
+            unsigned long total_read_bytes = 0;
+            unsigned long total_write_bytes = 0;
+            char *cmdline = NULL;
+            char *container_id = NULL;
+            char *child_cmdline = NULL;
+
+            get_task_struct(task);
+            mem_usage_mb = get_container_memory_usage(task);
+            container_cpu_time = get_container_cpu_time(task);
+            get_container_io_usage(task, &total_read_bytes, &total_write_bytes);
+            put_task_struct(task);
+
+            unsigned long cpu_usage = total_system_cpu_time ? (container_cpu_time * 10000) / total_system_cpu_time : 0;
+
+            cmdline = get_process_cmdline(task);
+            if (cmdline)
+                container_id = extract_container_id(cmdline);
+            child_cmdline = get_child_cmdline(task);
+
+            if (!first_process) {
+                seq_printf(m, ",\n");
+            } else {
+                first_process = 0;
+            }
+
+            seq_printf(m, "  {\n");
+            seq_printf(m, "    \"ID\": \"%s\",\n", container_id ? container_id : "N/A");
+            seq_printf(m, "    \"PID\": %d,\n", task->pid);
+            seq_printf(m, "    \"Cmdline\": \"%s\",\n", child_cmdline ? child_cmdline : "N/A");
+            seq_printf(m, "    \"MemoryUsageMB\": %lu,\n", mem_usage_mb);
+            seq_printf(m, "    \"CPUUsagePercent\": %lu.%02lu,\n", cpu_usage / 100, cpu_usage % 100);
+            seq_printf(m, "    \"ReadBytesMB\": %lu,\n", total_read_bytes);
+            seq_printf(m, "    \"WriteBytesMB\": %lu,\n", total_write_bytes);
+            seq_printf(m, "    \"TotalIOBytesMB\": %lu\n", total_read_bytes + total_write_bytes);
+            seq_printf(m, "  }");
+
+            if (cmdline)
+                kfree(cmdline);
+            if (container_id)
+                kfree(container_id);
+            if (child_cmdline)
+                kfree(child_cmdline);
         }
     }
+    rcu_read_unlock();
 
-    seq_printf(m, "\n]\n}\n");
+    seq_printf(m, "\n  ]\n");
+    seq_printf(m, "}\n");
     return 0;
 }
 
-// Función que se ejecuta al abrir el archivo /proc
 static int sysinfo_open(struct inode *inode, struct file *file) {
     return single_open(file, sysinfo_show, NULL);
 }
 
-// Estructura que contiene las operaciones del archivo /proc
 static const struct proc_ops sysinfo_ops = {
     .proc_open = sysinfo_open,
     .proc_read = seq_read,
+    .proc_lseek = seq_lseek,
+    .proc_release = single_release,
 };
 
-// Función de inicialización del módulo
 static int __init sysinfo_init(void) {
     proc_create(PROC_NAME, 0, NULL, &sysinfo_ops);
-    printk(KERN_INFO "sysinfo.json modulo cargado\n");
+    printk(KERN_INFO "sysinfo modulo cargado\n");
     return 0;
 }
 
-// Función de limpieza del módulo
 static void __exit sysinfo_exit(void) {
     remove_proc_entry(PROC_NAME, NULL);
-    printk(KERN_INFO "sysinfo.json modulo desinstalado\n");
+    printk(KERN_INFO "sysinfo modulo desinstalado\n");
 }
 
 module_init(sysinfo_init);
