@@ -4,17 +4,15 @@ services:
     image: grafana/grafana
     container_name: grafana
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: "admin"  # Puedes cambiar la contraseña
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      #GF_INSTALL_PLUGINS: "grafana-infinity-datasource"  # Instala el plugin Infinity
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana  # Volumen persistente para los datos
+      - ./:/data  # Monta el directorio actual dentro del contenedor en /data
     networks:
       - monitoring
 
 networks:
   monitoring:
     driver: bridge
-
-volumes:
-  grafana_data:

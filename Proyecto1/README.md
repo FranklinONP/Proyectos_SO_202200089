@@ -37,3 +37,8 @@ rust
 cargo build
 
 cargo run
+
+
+docker run -d -p 3000:3000 --name grafana \
+  -v /home/franklin-noj/Escritorio/Proyectos_SO_202200089/Proyecto1/admin/src/persistent_containers.json:/var/lib/grafana/persistent_containers.json:ro \
+  grafana/grafana:latest
