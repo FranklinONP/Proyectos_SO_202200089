@@ -6,7 +6,7 @@ use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use std::collections::HashMap;
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct SystemInfo {
@@ -46,8 +46,10 @@ struct Container {
     write_bytes_mb: u64,
     #[serde(rename = "TotalIOBytesMB")]
     total_io_bytes_mb: u64,
-    #[serde(skip)] // No serializamos este campo directamente en el JSON
-    creation_time: String, // Añadido para guardar la fecha de creación
+    #[serde(skip)]
+    creation_time: String,
+    #[serde(default)]
+    saved_at: String,
 }
 
 #[derive(Debug, Clone)]
@@ -56,11 +58,16 @@ struct DockerContainer {
     created: String,
 }
 
-// Estructura para el JSON persistente clasificado por tipo
 #[derive(Debug, Serialize, Deserialize)]
 struct PersistentData {
-    #[serde(flatten)]
-    containers_by_type: HashMap<String, Vec<Container>>,
+    #[serde(rename = "stress --hdd 1")]
+    stress_hdd: Vec<Container>,
+    #[serde(rename = "stress --io 1")]
+    stress_io: Vec<Container>,
+    #[serde(rename = "stress --vm 1 --vm-…")]
+    stress_vm: Vec<Container>,
+    #[serde(rename = "stress --cpu 1")]
+    stress_cpu: Vec<Container>,
 }
 
 fn read_proc_file(file_name: &str) -> io::Result<String> {
@@ -128,7 +135,10 @@ fn load_persistent_json(file_path: &str) -> PersistentData {
         }
     }
     PersistentData {
-        containers_by_type: HashMap::new(),
+        stress_hdd: Vec::new(),
+        stress_io: Vec::new(),
+        stress_vm: Vec::new(),
+        stress_cpu: Vec::new(),
     }
 }
 
@@ -141,21 +151,6 @@ fn save_persistent_json(file_path: &str, data: &PersistentData) -> io::Result<()
     let json = serde_json::to_string_pretty(data)?;
     file.write_all(json.as_bytes())?;
     Ok(())
-}
-
-// Función para clasificar contenedores según Cmdline (ajusta según tus 4 tipos)
-fn classify_container(cmdline: &str) -> String {
-    // Ejemplo básico: clasifica según palabras clave en Cmdline
-    // Debes definir tus 4 tipos aquí según tu criterio
-    if cmdline.contains("nginx") {
-        "web".to_string()
-    } else if cmdline.contains("python") {
-        "app".to_string()
-    } else if cmdline.contains("java") {
-        "java".to_string()
-    } else {
-        "other".to_string()
-    }
 }
 
 fn manage_containers() {
@@ -179,13 +174,13 @@ fn manage_containers() {
     let mut containers_with_metrics: Vec<(DockerContainer, Container)> = Vec::new();
     for dc in &docker_containers {
         if let Some(c) = system_info.containers.iter_mut().find(|c| c.id == dc.id) {
-            c.creation_time = dc.created.clone(); // Añadimos creation_time al contenedor
+            c.creation_time = dc.created.clone();
             containers_with_metrics.push((dc.clone(), c.clone()));
         }
     }
 
     containers_with_metrics.sort_by(|a, b| b.0.created.cmp(&a.0.created));
-    let latest_containers: Vec<(DockerContainer, Container)> = containers_with_metrics
+    let mut latest_containers: Vec<(DockerContainer, Container)> = containers_with_metrics
         .into_iter()
         .take(4)
         .collect();
@@ -203,15 +198,30 @@ fn manage_containers() {
 
     let persistent_file = "persistent_containers.json";
     let mut persistent_data = load_persistent_json(persistent_file);
+    let now: DateTime<Utc> = Utc::now();
+    let saved_at = now.to_rfc3339();
 
-    for (_, container) in &latest_containers {
-        let container_type = classify_container(&container.cmdline);
-        let containers_list = persistent_data.containers_by_type
-            .entry(container_type)
-            .or_insert_with(Vec::new);
-        
-        if !containers_list.iter().any(|c| c.id == container.id) {
-            containers_list.push(container.clone());
+    for &mut (_, ref mut container) in &mut latest_containers {
+        container.saved_at = saved_at.clone();
+        let cmdline = container.cmdline.trim(); // Eliminar espacios en blanco al inicio y final
+        if cmdline == "stress --hdd 1" {
+            if !persistent_data.stress_hdd.iter().any(|c| c.id == container.id) {
+                persistent_data.stress_hdd.push(container.clone());
+            }
+        } else if cmdline == "stress --io 1" {
+            if !persistent_data.stress_io.iter().any(|c| c.id == container.id) {
+                persistent_data.stress_io.push(container.clone());
+            }
+        } else if cmdline.starts_with("stress --vm 1") { // Coincidencia parcial para variaciones
+            if !persistent_data.stress_vm.iter().any(|c| c.id == container.id) {
+                persistent_data.stress_vm.push(container.clone());
+            }
+        } else if cmdline == "stress --cpu 1" {
+            if !persistent_data.stress_cpu.iter().any(|c| c.id == container.id) {
+                persistent_data.stress_cpu.push(container.clone());
+            }
+        } else {
+            println!("Contenedor con Cmdline '{}' no coincide con ninguna categoría", cmdline);
         }
     }
 

@@ -1,0 +1,18 @@
+version: '3'
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_INSTALL_PLUGINS: "grafana-infinity-datasource"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/var/lib/grafana/data # Monta el directorio actual en el contenedor
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
