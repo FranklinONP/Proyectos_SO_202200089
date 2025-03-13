@@ -5,7 +5,7 @@ use std::process::Command;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use reqwest::Client;
 use tokio::signal;
 
@@ -76,9 +76,9 @@ struct PersistentData {
 struct DashboardPanel {
     title: String,
     #[serde(rename = "type")]
-    type_: String,
+    type_field: String,
     datasource: String,
-    gridPos: GridPos,
+    grid_pos: GridPos,
     targets: Vec<Target>,
 }
 
@@ -92,10 +92,10 @@ struct GridPos {
 
 #[derive(Serialize)]
 struct Target {
-    refId: String,
+    ref_id: String,
     #[serde(rename = "type")]
-    type_: String,
-    queryType: String,
+    type_field: String,
+    query_type: String,
     query: String,
     format: String,
 }
@@ -105,7 +105,7 @@ struct Dashboard {
     title: String,
     panels: Vec<DashboardPanel>,
     editable: bool,
-    schemaVersion: i32,
+    schema_version: i32,
     version: i32,
 }
 
@@ -120,7 +120,6 @@ fn read_proc_file(file_name: &str) -> io::Result<String> {
     let mut file = File::open(path)?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
-    println!("Contenido de /proc/sysinfo: {}", content);
     Ok(content)
 }
 
@@ -137,8 +136,8 @@ fn get_docker_containers() -> Vec<DockerContainer> {
         .output()
         .expect("Fallo al ejecutar docker ps");
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    stdout.lines()
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
         .filter_map(|line| {
             let parts: Vec<&str> = line.split('\t').collect();
             if parts.len() >= 3 {
@@ -155,6 +154,11 @@ fn get_docker_containers() -> Vec<DockerContainer> {
 }
 
 fn kill_container(id: &str, name: &str) -> io::Result<()> {
+    if name.contains("grafana") {
+        println!("Contenedor Grafana {} no será eliminado", id);
+        return Ok(());
+    }
+    
     let output = Command::new("sudo")
         .arg("docker")
         .arg("rm")
@@ -163,11 +167,14 @@ fn kill_container(id: &str, name: &str) -> io::Result<()> {
         .output()?;
 
     if output.status.success() {
-        println!("Contenedor {} eliminado con éxito", id);
+        println!("Contenedor borrado: ID={}, Nombre={}", id, name);
         Ok(())
     } else {
         let error = String::from_utf8_lossy(&output.stderr);
-        Err(io::Error::new(io::ErrorKind::Other, format!("Error al eliminar contenedor {}: {}", id, error)))
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            format!("Error al eliminar contenedor {}: {}", id, error),
+        ))
     }
 }
 
@@ -192,82 +199,82 @@ fn save_persistent_json(file_path: &str, data: &PersistentData) -> io::Result<()
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
-        .truncate(true) // Esto sobrescribe, pero lo manejaremos en manage_containers
+        .truncate(true)
         .open(file_path)?;
     let json = serde_json::to_string_pretty(data)?;
     file.write_all(json.as_bytes())?;
     Ok(())
 }
 
-async fn create_dashboard(client: &Client) -> Result<(), Box<dyn std::error::Error>> {
+async fn send_to_grafana(client: &Client, _data: &PersistentData) -> Result<(), Box<dyn std::error::Error>> {
     let dashboard = DashboardWrapper {
         dashboard: Dashboard {
             title: "Container Metrics".to_string(),
             panels: vec![
                 DashboardPanel {
-                    title: "HDD Usage (Disk)".to_string(),
-                    type_: "timeseries".to_string(),
+                    title: "Disk Usage (HDD)".to_string(),
+                    type_field: "timeseries".to_string(),
                     datasource: "InfinityDS".to_string(),
-                    gridPos: GridPos { h: 8, w: 12, x: 0, y: 0 },
+                    grid_pos: GridPos { h: 8, w: 12, x: 0, y: 0 },
                     targets: vec![Target {
-                        refId: "A".to_string(),
-                        type_: "timeseries".to_string(),
-                        queryType: "json".to_string(),
-                        query: "$.['stress --hdd 1'].[*].{value: TotalIOBytesMB, time: saved_at}".to_string(),
+                        ref_id: "A".to_string(),
+                        type_field: "timeseries".to_string(),
+                        query_type: "json".to_string(),
+                        query: "$.['stress --hdd 1'][*].{value: TotalIOBytesMB, time: saved_at}".to_string(),
                         format: "time_series".to_string(),
                     }],
                 },
                 DashboardPanel {
                     title: "IO Usage".to_string(),
-                    type_: "timeseries".to_string(),
+                    type_field: "timeseries".to_string(),
                     datasource: "InfinityDS".to_string(),
-                    gridPos: GridPos { h: 8, w: 12, x: 12, y: 0 },
+                    grid_pos: GridPos { h: 8, w: 12, x: 12, y: 0 },
                     targets: vec![
                         Target {
-                            refId: "A".to_string(),
-                            type_: "timeseries".to_string(),
-                            queryType: "json".to_string(),
-                            query: "$.['stress --io 1'].[*].{value: ReadBytesMB, time: saved_at}".to_string(),
+                            ref_id: "A".to_string(),
+                            type_field: "timeseries".to_string(),
+                            query_type: "json".to_string(),
+                            query: "$.['stress --io 1'][*].{value: ReadBytesMB, time: saved_at}".to_string(),
                             format: "time_series".to_string(),
                         },
                         Target {
-                            refId: "B".to_string(),
-                            type_: "timeseries".to_string(),
-                            queryType: "json".to_string(),
-                            query: "$.['stress --io 1'].[*].{value: WriteBytesMB, time: saved_at}".to_string(),
+                            ref_id: "B".to_string(),
+                            type_field: "timeseries".to_string(),
+                            query_type: "json".to_string(),
+                            query: "$.['stress --io 1'][*].{value: WriteBytesMB, time: saved_at}".to_string(),
                             format: "time_series".to_string(),
                         },
                     ],
                 },
                 DashboardPanel {
-                    title: "VM Usage (RAM)".to_string(),
-                    type_: "timeseries".to_string(),
+                    title: "RAM Usage".to_string(),
+                    type_field: "timeseries".to_string(),
                     datasource: "InfinityDS".to_string(),
-                    gridPos: GridPos { h: 8, w: 12, x: 0, y: 8 },
+                    grid_pos: GridPos { h: 8, w: 12, x: 0, y: 8 },
                     targets: vec![Target {
-                        refId: "A".to_string(),
-                        type_: "timeseries".to_string(),
-                        queryType: "json".to_string(),
-                        query: "$.['stress --vm 1 --vm-…'].[*].{value: MemoryUsageMB, time: saved_at}".to_string(),
+                        ref_id: "A".to_string(),
+                        type_field: "timeseries".to_string(),
+                        query_type: "json".to_string(),
+                        query: "$.['stress --vm 1 --vm-…'][*].{value: MemoryUsageMB, time: saved_at}".to_string(),
                         format: "time_series".to_string(),
                     }],
                 },
                 DashboardPanel {
                     title: "CPU Usage".to_string(),
-                    type_: "timeseries".to_string(),
+                    type_field: "timeseries".to_string(),
                     datasource: "InfinityDS".to_string(),
-                    gridPos: GridPos { h: 8, w: 12, x: 12, y: 8 },
+                    grid_pos: GridPos { h: 8, w: 12, x: 12, y: 8 },
                     targets: vec![Target {
-                        refId: "A".to_string(),
-                        type_: "timeseries".to_string(),
-                        queryType: "json".to_string(),
-                        query: "$.['stress --cpu 1'].[*].{value: CPUUsagePercent, time: saved_at}".to_string(),
+                        ref_id: "A".to_string(),
+                        type_field: "timeseries".to_string(),
+                        query_type: "json".to_string(),
+                        query: "$.['stress --cpu 1'][*].{value: CPUUsagePercent, time: saved_at}".to_string(),
                         format: "time_series".to_string(),
                     }],
                 },
             ],
             editable: true,
-            schemaVersion: 36,
+            schema_version: 36,
             version: 0,
         },
         overwrite: true,
@@ -275,152 +282,124 @@ async fn create_dashboard(client: &Client) -> Result<(), Box<dyn std::error::Err
 
     let response = client
         .post("http://localhost:3000/api/dashboards/db")
-        .header("Authorization", "Bearer glsa_JjXfkiIBErXNTmLDNT3UzkTbCaRbo0fY_4ece443e") // Reemplaza con tu token API
+        .header("Authorization", "Bearer glsa_6r784gBmXaSi7AWVhg0dATev5eJk4MlW_2c7eac84")
         .header("Content-Type", "application/json")
         .json(&dashboard)
         .send()
         .await?;
 
     if response.status().is_success() {
-        println!("Dashboard creado exitosamente en Grafana.");
+        println!("Dashboard actualizado en Grafana exitosamente");
     } else {
-        eprintln!("Error al crear el dashboard: {:?}", response.text().await?);
+        eprintln!("Error al actualizar dashboard: {:?}", response.text().await?);
     }
 
     Ok(())
 }
 
-async fn manage_containers() {
+async fn manage_containers(client: &Client) -> Result<(), Box<dyn std::error::Error>> {
     let docker_containers = get_docker_containers();
-    println!("Contenedores encontrados: {:?}", docker_containers);
+    
+    let system_info = read_proc_file("sysinfo")?;
+    let system_info = parse_proc_to_struct(&system_info)?;
 
-    let mut system_info = match read_proc_file("sysinfo") {
-        Ok(json_str) => match parse_proc_to_struct(&json_str) {
-            Ok(info) => info,
-            Err(e) => {
-                eprintln!("Error al parsear JSON: {}", e);
-                return;
-            }
-        },
-        Err(e) => {
-            eprintln!("Error al leer /proc/sysinfo: {}", e);
-            return;
-        }
-    };
-
-    // Collect all containers with their metrics
     let mut containers_with_metrics: Vec<(DockerContainer, Container)> = Vec::new();
     for dc in &docker_containers {
-        if let Some(c) = system_info.containers.iter_mut().find(|c| c.id == dc.id) {
-            c.creation_time = dc.created.clone();
-            containers_with_metrics.push((dc.clone(), c.clone()));
+        if let Some(c) = system_info.containers.iter().find(|c| c.id == dc.id) {
+            let mut container = c.clone();
+            container.creation_time = dc.created.clone();
+            containers_with_metrics.push((dc.clone(), container));
         }
     }
 
-    // Group containers by their cmdline (type)
-    let mut cpu_containers: Vec<(DockerContainer, Container)> = Vec::new();
-    let mut ram_containers: Vec<(DockerContainer, Container)> = Vec::new();
-    let mut io_containers: Vec<(DockerContainer, Container)> = Vec::new();
-    let mut disk_containers: Vec<(DockerContainer, Container)> = Vec::new();
+    let mut cpu_containers = Vec::new();
+    let mut ram_containers = Vec::new();
+    let mut io_containers = Vec::new();
+    let mut disk_containers = Vec::new();
     
     for pair in containers_with_metrics {
         let cmdline = pair.1.cmdline.trim();
-        if cmdline == "stress --cpu 1" {
-            cpu_containers.push(pair);
-        } else if cmdline.starts_with("stress --vm 1") {
-            ram_containers.push(pair);
-        } else if cmdline == "stress --io 1" {
-            io_containers.push(pair);
-        } else if cmdline == "stress --hdd 1" {
-            disk_containers.push(pair);
+        match cmdline {
+            "stress --cpu 1" => cpu_containers.push(pair),
+            cmd if cmd.starts_with("stress --vm 1") => ram_containers.push(pair),
+            "stress --io 1" => io_containers.push(pair),
+            "stress --hdd 1" => disk_containers.push(pair),
+            _ => {}
         }
     }
 
-    // Sort each group by creation time (newest first)
     cpu_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
     ram_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
     io_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
     disk_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
 
-    // Get the newest container from each group
-    let mut keep_containers: Vec<(DockerContainer, Container)> = Vec::new();
-    
-    if let Some(cpu) = cpu_containers.first() {
-        keep_containers.push(cpu.clone());
-    }
-    if let Some(ram) = ram_containers.first() {
-        keep_containers.push(ram.clone());
-    }
-    if let Some(io) = io_containers.first() {
-        keep_containers.push(io.clone());
-    }
-    if let Some(disk) = disk_containers.first() {
-        keep_containers.push(disk.clone());
-    }
+    let mut keep_containers = Vec::new();
+    if let Some(cpu) = cpu_containers.first() { keep_containers.push(cpu.clone()); }
+    if let Some(ram) = ram_containers.first() { keep_containers.push(ram.clone()); }
+    if let Some(io) = io_containers.first() { keep_containers.push(io.clone()); }
+    if let Some(disk) = disk_containers.first() { keep_containers.push(disk.clone()); }
 
-    // Create a list of container IDs to keep
     let keep_ids: Vec<String> = keep_containers.iter()
         .map(|(dc, _)| dc.id.clone())
         .collect();
-    
-    println!("Contenedores a conservar (más recientes de cada tipo): {:?}", keep_ids);
 
-    // Remove all containers that are not in the keep list
     for dc in &docker_containers {
-        if !keep_ids.contains(&dc.id) && dc.id != "N/A" {
-            if let Err(e) = kill_container(&dc.id, &dc.name) {
-                eprintln!("Error al eliminar contenedor {}: {}", dc.id, e);
-            }
+        if !keep_ids.contains(&dc.id) && !dc.name.contains("grafana") && dc.id != "N/A" {
+            kill_container(&dc.id, &dc.name)?;
         }
     }
 
-    // Update persistent data
     let persistent_file = "persistent_containers.json";
     let mut persistent_data = load_persistent_json(persistent_file);
-    let now: DateTime<Utc> = Utc::now();
-    let saved_at = now.to_rfc3339();
+    let now = Utc::now().to_rfc3339();
 
-    for &mut (_, ref mut container) in &mut keep_containers {
-        container.saved_at = saved_at.clone();
-        let cmdline = container.cmdline.trim();
-        if cmdline == "stress --hdd 1" {
-            persistent_data.stress_hdd.push(container.clone());
-        } else if cmdline == "stress --io 1" {
-            persistent_data.stress_io.push(container.clone());
-        } else if cmdline.starts_with("stress --vm 1") {
-            persistent_data.stress_vm.push(container.clone());
-        } else if cmdline == "stress --cpu 1" {
-            persistent_data.stress_cpu.push(container.clone());
+    for (dc, container) in &mut keep_containers {
+        container.saved_at = now.clone();
+        match container.cmdline.trim() {
+            "stress --hdd 1" => {
+                println!("Contenedor guardado: ID={}, Nombre={}, Tipo=stress --hdd 1", dc.id, dc.name);
+                persistent_data.stress_hdd.push(container.clone());
+            }
+            "stress --io 1" => {
+                println!("Contenedor guardado: ID={}, Nombre={}, Tipo=stress --io 1", dc.id, dc.name);
+                persistent_data.stress_io.push(container.clone());
+            }
+            cmd if cmd.starts_with("stress --vm 1") => {
+                println!("Contenedor guardado: ID={}, Nombre={}, Tipo=stress --vm 1", dc.id, dc.name);
+                persistent_data.stress_vm.push(container.clone());
+            }
+            "stress --cpu 1" => {
+                println!("Contenedor guardado: ID={}, Nombre={}, Tipo=stress --cpu 1", dc.id, dc.name);
+                persistent_data.stress_cpu.push(container.clone());
+            }
+            _ => {}
         }
     }
 
-    if let Err(e) = save_persistent_json(persistent_file, &persistent_data) {
-        eprintln!("Error al guardar JSON persistente: {}", e);
-    }
+    save_persistent_json(persistent_file, &persistent_data)?;
+    send_to_grafana(client, &persistent_data).await?;
+    
+    Ok(())
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
-
     println!("Presiona Ctrl+C para finalizar...");
-    let mut running = true;
 
-    while running {
-        manage_containers().await;
+    loop {
+        if let Err(e) = manage_containers(&client).await {
+            eprintln!("Error en manage_containers: {}", e);
+        }
+        
         tokio::select! {
             _ = tokio::time::sleep(Duration::from_secs(30)) => {},
             _ = signal::ctrl_c() => {
-                println!("Recibido Ctrl+C, finalizando...");
-                create_dashboard(&client).await?;
-                running = false;
+                println!("Programa finalizado");
+                break;
             }
         }
     }
 
-    println!("Programa finalizado. Dashboard creado en Grafana.");
     Ok(())
 }
-
-
-//ya me crea algop mejor
