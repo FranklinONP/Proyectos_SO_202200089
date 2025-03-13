@@ -155,11 +155,6 @@ fn get_docker_containers() -> Vec<DockerContainer> {
 }
 
 fn kill_container(id: &str, name: &str) -> io::Result<()> {
-    if name == "grafana" {
-        println!("Contenedor {} es Grafana, no se eliminará.", id);
-        return Ok(());
-    }
-
     let output = Command::new("sudo")
         .arg("docker")
         .arg("rm")
@@ -313,49 +308,79 @@ async fn manage_containers() {
         }
     };
 
-    let mut non_grafana_containers: Vec<DockerContainer> = docker_containers
-        .iter()
-        .filter(|dc| dc.name != "grafana")
-        .cloned()
-        .collect();
-
+    // Collect all containers with their metrics
     let mut containers_with_metrics: Vec<(DockerContainer, Container)> = Vec::new();
-    for dc in &non_grafana_containers {
+    for dc in &docker_containers {
         if let Some(c) = system_info.containers.iter_mut().find(|c| c.id == dc.id) {
             c.creation_time = dc.created.clone();
             containers_with_metrics.push((dc.clone(), c.clone()));
         }
     }
 
-    containers_with_metrics.sort_by(|a, b| b.0.created.cmp(&a.0.created));
-    let mut latest_containers: Vec<(DockerContainer, Container)> = containers_with_metrics
-        .into_iter()
-        .take(4)
+    // Group containers by their cmdline (type)
+    let mut cpu_containers: Vec<(DockerContainer, Container)> = Vec::new();
+    let mut ram_containers: Vec<(DockerContainer, Container)> = Vec::new();
+    let mut io_containers: Vec<(DockerContainer, Container)> = Vec::new();
+    let mut disk_containers: Vec<(DockerContainer, Container)> = Vec::new();
+    
+    for pair in containers_with_metrics {
+        let cmdline = pair.1.cmdline.trim();
+        if cmdline == "stress --cpu 1" {
+            cpu_containers.push(pair);
+        } else if cmdline.starts_with("stress --vm 1") {
+            ram_containers.push(pair);
+        } else if cmdline == "stress --io 1" {
+            io_containers.push(pair);
+        } else if cmdline == "stress --hdd 1" {
+            disk_containers.push(pair);
+        }
+    }
+
+    // Sort each group by creation time (newest first)
+    cpu_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
+    ram_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
+    io_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
+    disk_containers.sort_by(|a, b| b.0.created.cmp(&a.0.created));
+
+    // Get the newest container from each group
+    let mut keep_containers: Vec<(DockerContainer, Container)> = Vec::new();
+    
+    if let Some(cpu) = cpu_containers.first() {
+        keep_containers.push(cpu.clone());
+    }
+    if let Some(ram) = ram_containers.first() {
+        keep_containers.push(ram.clone());
+    }
+    if let Some(io) = io_containers.first() {
+        keep_containers.push(io.clone());
+    }
+    if let Some(disk) = disk_containers.first() {
+        keep_containers.push(disk.clone());
+    }
+
+    // Create a list of container IDs to keep
+    let keep_ids: Vec<String> = keep_containers.iter()
+        .map(|(dc, _)| dc.id.clone())
         .collect();
+    
+    println!("Contenedores a conservar (más recientes de cada tipo): {:?}", keep_ids);
 
-    let keep_ids: Vec<String> = latest_containers.iter().map(|(dc, _)| dc.id.clone()).collect();
-    println!("Contenedores a conservar (más jóvenes, excluyendo Grafana): {:?}", keep_ids);
-
-    let grafana_id = docker_containers
-        .iter()
-        .find(|dc| dc.name == "grafana")
-        .map(|dc| dc.id.clone());
-
+    // Remove all containers that are not in the keep list
     for dc in &docker_containers {
-        let is_grafana = grafana_id.as_ref().map_or(false, |id| id == &dc.id);
-        if !keep_ids.contains(&dc.id) && !is_grafana && dc.id != "N/A" {
+        if !keep_ids.contains(&dc.id) && dc.id != "N/A" {
             if let Err(e) = kill_container(&dc.id, &dc.name) {
                 eprintln!("Error al eliminar contenedor {}: {}", dc.id, e);
             }
         }
     }
 
+    // Update persistent data
     let persistent_file = "persistent_containers.json";
     let mut persistent_data = load_persistent_json(persistent_file);
     let now: DateTime<Utc> = Utc::now();
     let saved_at = now.to_rfc3339();
 
-    for &mut (_, ref mut container) in &mut latest_containers {
+    for &mut (_, ref mut container) in &mut keep_containers {
         container.saved_at = saved_at.clone();
         let cmdline = container.cmdline.trim();
         if cmdline == "stress --hdd 1" {
@@ -366,8 +391,6 @@ async fn manage_containers() {
             persistent_data.stress_vm.push(container.clone());
         } else if cmdline == "stress --cpu 1" {
             persistent_data.stress_cpu.push(container.clone());
-        } else {
-            println!("Contenedor con Cmdline '{}' no coincide con ninguna categoría", cmdline);
         }
     }
 

@@ -1,362 +1,54 @@
 {
   "stress --hdd 1": [
     {
-      "ID": "c7ff5f7b0270",
-      "PID": 34672,
+      "ID": "fd79f91baeac",
+      "PID": 140927,
       "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 14,
-      "CPUUsagePercent": 0.02,
+      "MemoryUsageMB": 13,
+      "CPUUsagePercent": 0.38,
       "ReadBytesMB": 0,
-      "WriteBytesMB": 6144,
-      "TotalIOBytesMB": 6144,
-      "saved_at": "2025-03-13T14:32:14.930018522+00:00"
-    },
-    {
-      "ID": "c7ff5f7b0270",
-      "PID": 34672,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 14,
-      "CPUUsagePercent": 18.74,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 2553860,
-      "TotalIOBytesMB": 2553860,
-      "saved_at": "2025-03-13T14:54:53.537788581+00:00"
-    },
-    {
-      "ID": "c29e75df2c4b",
-      "PID": 50941,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 7.3,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 218112,
-      "TotalIOBytesMB": 218112,
-      "saved_at": "2025-03-13T14:58:19.603056135+00:00"
-    },
-    {
-      "ID": "c29e75df2c4b",
-      "PID": 50941,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 15.21,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 1209345,
-      "TotalIOBytesMB": 1209345,
-      "saved_at": "2025-03-13T15:07:37.359212268+00:00"
-    },
-    {
-      "ID": "c29e75df2c4b",
-      "PID": 50941,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 16.16,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 1615874,
-      "TotalIOBytesMB": 1615874,
-      "saved_at": "2025-03-13T15:11:24.385187990+00:00"
-    },
-    {
-      "ID": "c29e75df2c4b",
-      "PID": 50941,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 17.59,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 2202142,
-      "TotalIOBytesMB": 2202142,
-      "saved_at": "2025-03-13T15:16:01.613305540+00:00"
-    },
-    {
-      "ID": "c29e75df2c4b",
-      "PID": 50941,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 17.71,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 2267680,
-      "TotalIOBytesMB": 2267680,
-      "saved_at": "2025-03-13T15:16:31.664767150+00:00"
-    },
-    {
-      "ID": "c29e75df2c4b",
-      "PID": 50941,
-      "Cmdline": "stress --hdd 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 18.56,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 3126276,
-      "TotalIOBytesMB": 3126276,
-      "saved_at": "2025-03-13T15:24:15.043333257+00:00"
+      "WriteBytesMB": 49562,
+      "TotalIOBytesMB": 49562,
+      "saved_at": "2025-03-13T18:35:23.545628588+00:00"
     }
   ],
   "stress --io 1": [
     {
-      "ID": "f19c9295f3dc",
-      "PID": 34584,
+      "ID": "a463409ba209",
+      "PID": 140690,
       "Cmdline": "stress --io 1 ",
       "MemoryUsageMB": 12,
-      "CPUUsagePercent": 0.0,
+      "CPUUsagePercent": 0.01,
       "ReadBytesMB": 0,
       "WriteBytesMB": 0,
       "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:32:14.930018522+00:00"
-    },
-    {
-      "ID": "f19c9295f3dc",
-      "PID": 34584,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 1.07,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:54:53.537788581+00:00"
-    },
-    {
-      "ID": "7617fa9f8b11",
-      "PID": 50871,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 13,
-      "CPUUsagePercent": 0.42,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:58:19.603056135+00:00"
-    },
-    {
-      "ID": "7617fa9f8b11",
-      "PID": 50871,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 13,
-      "CPUUsagePercent": 1.01,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:07:37.359212268+00:00"
-    },
-    {
-      "ID": "7617fa9f8b11",
-      "PID": 50871,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 13,
-      "CPUUsagePercent": 1.03,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:11:24.385187990+00:00"
-    },
-    {
-      "ID": "7617fa9f8b11",
-      "PID": 50871,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 13,
-      "CPUUsagePercent": 1.2,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:16:01.613305540+00:00"
-    },
-    {
-      "ID": "7617fa9f8b11",
-      "PID": 50871,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 13,
-      "CPUUsagePercent": 1.21,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:16:31.664767150+00:00"
-    },
-    {
-      "ID": "7617fa9f8b11",
-      "PID": 50871,
-      "Cmdline": "stress --io 1 ",
-      "MemoryUsageMB": 13,
-      "CPUUsagePercent": 1.25,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:24:15.043333257+00:00"
+      "saved_at": "2025-03-13T18:35:23.545628588+00:00"
     }
   ],
   "stress --vm 1 --vm-…": [
     {
-      "ID": "45944161c864",
-      "PID": 34516,
+      "ID": "e0380934a11f",
+      "PID": 140512,
       "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 118,
-      "CPUUsagePercent": 0.12,
+      "MemoryUsageMB": 111,
+      "CPUUsagePercent": 1.24,
       "ReadBytesMB": 0,
       "WriteBytesMB": 0,
       "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:32:14.930018522+00:00"
-    },
-    {
-      "ID": "45944161c864",
-      "PID": 34516,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 62,
-      "CPUUsagePercent": 32.35,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:54:53.537788581+00:00"
-    },
-    {
-      "ID": "10c8d806989d",
-      "PID": 50805,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 39,
-      "CPUUsagePercent": 12.72,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:58:19.603056135+00:00"
-    },
-    {
-      "ID": "10c8d806989d",
-      "PID": 50805,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 94,
-      "CPUUsagePercent": 26.94,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:07:37.359212268+00:00"
-    },
-    {
-      "ID": "10c8d806989d",
-      "PID": 50805,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 41,
-      "CPUUsagePercent": 28.55,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:11:24.385187990+00:00"
-    },
-    {
-      "ID": "10c8d806989d",
-      "PID": 50805,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 61,
-      "CPUUsagePercent": 29.65,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:16:01.613305540+00:00"
-    },
-    {
-      "ID": "10c8d806989d",
-      "PID": 50805,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 128,
-      "CPUUsagePercent": 29.74,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:16:31.664767150+00:00"
-    },
-    {
-      "ID": "10c8d806989d",
-      "PID": 50805,
-      "Cmdline": "stress --vm 1 --vm-bytes 128M ",
-      "MemoryUsageMB": 59,
-      "CPUUsagePercent": 31.32,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:24:15.043333257+00:00"
+      "saved_at": "2025-03-13T18:35:23.545628588+00:00"
     }
   ],
   "stress --cpu 1": [
     {
-      "ID": "6519a00e0483",
-      "PID": 34438,
+      "ID": "f4aae7f0f5b4",
+      "PID": 140402,
       "Cmdline": "stress --cpu 1 ",
       "MemoryUsageMB": 12,
-      "CPUUsagePercent": 0.14,
+      "CPUUsagePercent": 1.36,
       "ReadBytesMB": 0,
       "WriteBytesMB": 0,
       "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:32:14.930018522+00:00"
-    },
-    {
-      "ID": "6519a00e0483",
-      "PID": 34438,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 32.39,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:54:53.537788581+00:00"
-    },
-    {
-      "ID": "ee17014dee5f",
-      "PID": 50737,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 11,
-      "CPUUsagePercent": 12.74,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T14:58:19.603056135+00:00"
-    },
-    {
-      "ID": "ee17014dee5f",
-      "PID": 50737,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 11,
-      "CPUUsagePercent": 26.94,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:07:37.359212268+00:00"
-    },
-    {
-      "ID": "ee17014dee5f",
-      "PID": 50737,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 28.56,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:11:24.385187990+00:00"
-    },
-    {
-      "ID": "ee17014dee5f",
-      "PID": 50737,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 29.66,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:16:01.613305540+00:00"
-    },
-    {
-      "ID": "ee17014dee5f",
-      "PID": 50737,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 29.74,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:16:31.664767150+00:00"
-    },
-    {
-      "ID": "ee17014dee5f",
-      "PID": 50737,
-      "Cmdline": "stress --cpu 1 ",
-      "MemoryUsageMB": 12,
-      "CPUUsagePercent": 31.32,
-      "ReadBytesMB": 0,
-      "WriteBytesMB": 0,
-      "TotalIOBytesMB": 0,
-      "saved_at": "2025-03-13T15:24:15.043333257+00:00"
+      "saved_at": "2025-03-13T18:35:23.545628588+00:00"
     }
   ]
 }
