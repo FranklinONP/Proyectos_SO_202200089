@@ -24,6 +24,8 @@ cat /proc/sysinfo
 Borrar todos los contenedores 
 docker rm -f $(docker ps -aq)
 
+docker-compose up
+
 
 saber consumo real...
     ==> ps -eo pid,ppid,rss,comm | grep containerd-shim
@@ -46,3 +48,6 @@ docker run -d -p 3000:3000 --name grafana \
 
 docker run -d -p 3000:3000 --name grafana \
   grafana/grafana:latest
+
+
+docker-compose up -d
