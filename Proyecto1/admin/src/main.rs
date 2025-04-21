@@ -282,7 +282,7 @@ async fn send_to_grafana(client: &Client, _data: &PersistentData) -> Result<(), 
 
     let response = client
         .post("http://localhost:3000/api/dashboards/db")
-        .header("Authorization", "Bearer glsa_6r784gBmXaSi7AWVhg0dATev5eJk4MlW_2c7eac84")
+        .header("Authorization", "Bearer glsa_tV2iWZ48Q3rEHQglxy59PIgpPdfaRwXL_3d3dc8e1")
         .header("Content-Type", "application/json")
         .json(&dashboard)
         .send()

@@ -16,7 +16,7 @@ do
     container_name=$(generate_random_name)
     
     # Crear el contenedor con el tipo seleccionado
-    docker run -d --name $container_name alpine-stress stress $container_type
+    docker run -d --name $container_name containerstack/alpine-stress stress $container_type
     
     echo "Contenedor $container_name creado con configuración: $container_type"
     
@@ -28,4 +28,4 @@ do
 done
 
 # Registrar ejecución en un log
-echo "Script ejecutado el $(date)" >> /home/franklin-noj/Documentos/Universidad/7mo_Semestre/Sopes1/Lab/Proyectos_SO_202200089/Proyecto1/log.txt
+echo "Script ejecutado el $(date)" >> ~/Escritorio/Proyectos_SO_202200089/Proyecto1/Kernel/log.txt
