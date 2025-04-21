@@ -212,6 +212,3 @@ Este programa en **Rust** monitorea contenedores de **Docker**, analiza su uso d
   "stress --vm 1 --vm-keep": [],
   "stress --cpu 1": []
 }
-
-
-
