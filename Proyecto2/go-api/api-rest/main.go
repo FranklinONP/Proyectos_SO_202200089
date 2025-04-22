@@ -36,4 +36,4 @@ func processWeather(w http.ResponseWriter, r *http.Request) {
 	kafkaClient := pb.NewWeatherServiceClient(kafkaConn)
 
 	// Connect to RabbitMQ gRPC server
-	rabbitConn, err := grpc.Dial("rabbitmq-grpc
+	rabbitConn, err := grpc.Dial("rabbitmq-grpc")
