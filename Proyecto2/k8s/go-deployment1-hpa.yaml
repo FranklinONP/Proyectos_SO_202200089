@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: rust-api-hpa
-  namespace: weather-app
+  name: go-deployment1-hpa
+  namespace: proyecto2
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: rust-api
+    name: go-deployment1
   minReplicas: 1
   maxReplicas: 3
   metrics:

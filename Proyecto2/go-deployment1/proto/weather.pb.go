@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v3.21.12
-// source: weather.proto
+// source: proto/weather.proto
 
 package proto
 
@@ -32,7 +32,7 @@ type WeatherRequest struct {
 
 func (x *WeatherRequest) Reset() {
 	*x = WeatherRequest{}
-	mi := &file_weather_proto_msgTypes[0]
+	mi := &file_proto_weather_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *WeatherRequest) String() string {
 func (*WeatherRequest) ProtoMessage() {}
 
 func (x *WeatherRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weather_proto_msgTypes[0]
+	mi := &file_proto_weather_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *WeatherRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WeatherRequest.ProtoReflect.Descriptor instead.
 func (*WeatherRequest) Descriptor() ([]byte, []int) {
-	return file_weather_proto_rawDescGZIP(), []int{0}
+	return file_proto_weather_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *WeatherRequest) GetDescription() string {
@@ -83,14 +83,14 @@ func (x *WeatherRequest) GetWeather() string {
 
 type WeatherResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *WeatherResponse) Reset() {
 	*x = WeatherResponse{}
-	mi := &file_weather_proto_msgTypes[1]
+	mi := &file_proto_weather_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -102,7 +102,7 @@ func (x *WeatherResponse) String() string {
 func (*WeatherResponse) ProtoMessage() {}
 
 func (x *WeatherResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weather_proto_msgTypes[1]
+	mi := &file_proto_weather_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -115,48 +115,48 @@ func (x *WeatherResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WeatherResponse.ProtoReflect.Descriptor instead.
 func (*WeatherResponse) Descriptor() ([]byte, []int) {
-	return file_weather_proto_rawDescGZIP(), []int{1}
+	return file_proto_weather_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *WeatherResponse) GetStatus() string {
+func (x *WeatherResponse) GetMessage() string {
 	if x != nil {
-		return x.Status
+		return x.Message
 	}
 	return ""
 }
 
-var File_weather_proto protoreflect.FileDescriptor
+var File_proto_weather_proto protoreflect.FileDescriptor
 
-const file_weather_proto_rawDesc = "" +
+const file_proto_weather_proto_rawDesc = "" +
 	"\n" +
-	"\rweather.proto\x12\aweather\"f\n" +
+	"\x13proto/weather.proto\x12\aweather\"f\n" +
 	"\x0eWeatherRequest\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x18\n" +
 	"\acountry\x18\x02 \x01(\tR\acountry\x12\x18\n" +
-	"\aweather\x18\x03 \x01(\tR\aweather\")\n" +
-	"\x0fWeatherResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status2U\n" +
+	"\aweather\x18\x03 \x01(\tR\aweather\"+\n" +
+	"\x0fWeatherResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2U\n" +
 	"\x0eWeatherService\x12C\n" +
 	"\x0ePublishWeather\x12\x17.weather.WeatherRequest\x1a\x18.weather.WeatherResponseB\tZ\a./protob\x06proto3"
 
 var (
-	file_weather_proto_rawDescOnce sync.Once
-	file_weather_proto_rawDescData []byte
+	file_proto_weather_proto_rawDescOnce sync.Once
+	file_proto_weather_proto_rawDescData []byte
 )
 
-func file_weather_proto_rawDescGZIP() []byte {
-	file_weather_proto_rawDescOnce.Do(func() {
-		file_weather_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_weather_proto_rawDesc), len(file_weather_proto_rawDesc)))
+func file_proto_weather_proto_rawDescGZIP() []byte {
+	file_proto_weather_proto_rawDescOnce.Do(func() {
+		file_proto_weather_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_weather_proto_rawDesc), len(file_proto_weather_proto_rawDesc)))
 	})
-	return file_weather_proto_rawDescData
+	return file_proto_weather_proto_rawDescData
 }
 
-var file_weather_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_weather_proto_goTypes = []any{
+var file_proto_weather_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_weather_proto_goTypes = []any{
 	(*WeatherRequest)(nil),  // 0: weather.WeatherRequest
 	(*WeatherResponse)(nil), // 1: weather.WeatherResponse
 }
-var file_weather_proto_depIdxs = []int32{
+var file_proto_weather_proto_depIdxs = []int32{
 	0, // 0: weather.WeatherService.PublishWeather:input_type -> weather.WeatherRequest
 	1, // 1: weather.WeatherService.PublishWeather:output_type -> weather.WeatherResponse
 	1, // [1:2] is the sub-list for method output_type
@@ -166,26 +166,26 @@ var file_weather_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_weather_proto_init() }
-func file_weather_proto_init() {
-	if File_weather_proto != nil {
+func init() { file_proto_weather_proto_init() }
+func file_proto_weather_proto_init() {
+	if File_proto_weather_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weather_proto_rawDesc), len(file_weather_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_weather_proto_rawDesc), len(file_proto_weather_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_weather_proto_goTypes,
-		DependencyIndexes: file_weather_proto_depIdxs,
-		MessageInfos:      file_weather_proto_msgTypes,
+		GoTypes:           file_proto_weather_proto_goTypes,
+		DependencyIndexes: file_proto_weather_proto_depIdxs,
+		MessageInfos:      file_proto_weather_proto_msgTypes,
 	}.Build()
-	File_weather_proto = out.File
-	file_weather_proto_goTypes = nil
-	file_weather_proto_depIdxs = nil
+	File_proto_weather_proto = out.File
+	file_proto_weather_proto_goTypes = nil
+	file_proto_weather_proto_depIdxs = nil
 }

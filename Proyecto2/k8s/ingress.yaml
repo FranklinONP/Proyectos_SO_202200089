@@ -1,20 +1,20 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: weather-ingress
-  namespace: weather-app
+  name: go-deployment1-ingress
+  namespace: proyecto2
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
-  - host: ip.nip.io
+  - host: go-deployment1.34.135.173.147.nip.io
     http:
       paths:
-      - path: /input
+      - path: /
         pathType: Prefix
         backend:
           service:
-            name: rust-api-service
+            name: go-deployment1-service
             port:
               number: 8080
