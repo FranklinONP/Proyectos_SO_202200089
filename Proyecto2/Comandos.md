@@ -25,3 +25,9 @@ Para probar el go-deployment1
 
 
 namespaces   proyecto2
+
+Cosas a instalar
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    
+revisar los pods de go *deployment1
+    kubectl logs -n proyecto2 go-deployment1-7cf4b7c6b7-xfvhd

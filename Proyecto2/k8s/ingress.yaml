@@ -1,17 +1,31 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: go-deployment1-ingress
+  name: ingress
   namespace: proyecto2
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # Desactiva redirección a HTTPS
 spec:
   ingressClassName: nginx
   rules:
-  - host: go-deployment1.34.135.173.147.nip.io
+  - host: go-deployment1.34.122.73.35.nip.io
     http:
       paths:
-      - path: /
+      - path: /process
+        pathType: Prefix
+        backend:
+          service:
+            name: go-deployment1-service
+            port:
+              number: 8080
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: go-deployment1-service
+            port:
+              number: 8080
+      - path: /status
         pathType: Prefix
         backend:
           service:
