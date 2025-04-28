@@ -35,7 +35,7 @@ async fn input_weather(
     }
 
     // Obtener la URL del Deployment de Go desde una variable de entorno
-    let go_api_url = env::var("GO_API_URL").unwrap_or_else(|_| "http://go-deployment-service:8080/process".to_string());
+    let go_api_url = env::var("GO_API_URL").unwrap_or_else(|_| "http://go-deployment1-service:8080/process".to_string());
 
     // Enviar la petición al Deployment de Go
     match client
@@ -88,7 +88,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(client.clone()))
-            .route("/input", web::post().to(input_weather))
+            .route("/process", web::post().to(input_weather))
             .route("/health", web::get().to(health_check))
     })
     .bind(&address)?

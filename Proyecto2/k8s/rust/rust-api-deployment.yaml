@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-api
+  namespace: proyecto2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rust-api
+  template:
+    metadata:
+      labels:
+        app: rust-api
+    spec:
+      containers:
+      - name: rust-api
+        image: 34.135.173.147.nip.io/proyecto2/rust-api:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: GO_API_URL
+          value: "http://go-deployment1-service:8080/process"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"

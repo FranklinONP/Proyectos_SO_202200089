@@ -20,4 +20,4 @@ COPY --from=builder /app/go-deployment1 /app/go-deployment1
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación
-CMD ["./go-deployment1"]
+CMD ["/app/go-deployment1"]

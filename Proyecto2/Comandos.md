@@ -1,4 +1,7 @@
 Para subir imagenes a harbor
+    docker build -t 34.135.173.147.nip.io/proyecto2/rust-api:latest .
+    docker push 34.135.173.147.nip.io/proyecto2/rust-api:latest
+
     docker build -t 34.135.173.147.nip.io/proyecto2/go-deployment1:latest .
     docker push 34.135.173.147.nip.io/proyecto2/go-deployment1:latest
 
@@ -31,3 +34,10 @@ Cosas a instalar
     
 revisar los pods de go *deployment1
     kubectl logs -n proyecto2 go-deployment1-7cf4b7c6b7-xfvhd
+
+
+
+Curl
+
+    - http://go-deployment1.34.122.73.35.nip.io/status
+    - curl http://go-deployment1.34.122.73.35.nip.io/health

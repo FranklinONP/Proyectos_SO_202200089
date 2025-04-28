@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rust-api-ingress
+  namespace: proyecto2
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rust-api.34.122.73.35.nip.io
+    http:
+      paths:
+      - path: /input
+        pathType: Prefix
+        backend:
+          service:
+            name: rust-api-service
+            port:
+              number: 8080
+      - path: /process
+        pathType: Prefix
+        backend:
+          service:
+            name: rust-api-service
+            port:
+              number: 8080
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: rust-api-service
+            port:
+              number: 8080

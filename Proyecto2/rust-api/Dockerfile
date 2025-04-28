@@ -18,4 +18,4 @@ RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/
 EXPOSE 8080
 
 # Comando para ejecutar la API
-CMD ["rust-api"]
+CMD ["/app/rust-api"]
