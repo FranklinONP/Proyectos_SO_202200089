@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-consumer
+  namespace: proyecto2
+  labels:
+    app: rabbitmq-consumer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rabbitmq-consumer
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-consumer
+    spec:
+      containers:
+      - name: rabbitmq-consumer
+        image: 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: regcred

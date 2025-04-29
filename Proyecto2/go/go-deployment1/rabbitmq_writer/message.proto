@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+package message;
+
+// Definición del mensaje WeatherTweet
+message WeatherTweet {
+  string description = 1;
+  string country = 2;
+  string weather = 3;
+}
+
+// Definición del servicio RabbitMQWriter
+service RabbitMQWriter {
+  rpc PublishMessage(WeatherTweet) returns (PublishResponse);
+}
+
+// Mensaje de respuesta
+message PublishResponse {
+  string message = 1;
+}

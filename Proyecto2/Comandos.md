@@ -5,6 +5,12 @@ Para subir imagenes a harbor
     docker build -t 34.135.173.147.nip.io/proyecto2/go-deployment1:latest .
     docker push 34.135.173.147.nip.io/proyecto2/go-deployment1:latest
 
+    docker build -t 34.135.173.147.nip.io/proyecto2/rabbitmq-writer:latest .
+    docker push 34.135.173.147.nip.io/proyecto2/rabbitmq-writer:latest
+
+    docker build -f rabbitmq_writer/consumer/Dockerfile  -t 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest .     desde ./deployment1
+    docker push 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest
+
 Para subir los .yml al cluster
     kubectl apply -f nombredel.yaml
 
