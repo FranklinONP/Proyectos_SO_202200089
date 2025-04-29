@@ -115,26 +115,25 @@ func main() {
 		}
 		log.Printf("Mensaje almacenado como hash en Valkey con clave %s", key)
 
-		// Incrementar el contador de mensajes por país
+		// Incrementar el contador de mensajes por país en la tabla hash "country_counts"
 		country, ok := data["Country"].(string)
 		if !ok {
 			log.Printf("No se pudo obtener el país del mensaje: %v", data)
 			continue
 		}
-		countryCounterKey := fmt.Sprintf("country_counter:%s", country)
-		err = valkeyClient.(*redis.Client).Incr(ctx, countryCounterKey).Err()
+		err = valkeyClient.(*redis.Client).HIncrBy(ctx, "country_counts", country, 1).Err()
 		if err != nil {
 			log.Printf("Error al incrementar el contador de país en Valkey: %v", err)
 			continue
 		}
-		log.Printf("Contador de país %s incrementado", country)
+		log.Printf("Contador de país %s incrementado en country_counts", country)
 
-		// Incrementar el contador total de mensajes
-		err = valkeyClient.(*redis.Client).Incr(ctx, "total_messages").Err()
+		// Incrementar el contador total de mensajes en la tabla hash "total_messages"
+		err = valkeyClient.(*redis.Client).HIncrBy(ctx, "total_messages", "count", 1).Err()
 		if err != nil {
 			log.Printf("Error al incrementar el contador total en Valkey: %v", err)
 			continue
 		}
-		log.Printf("Contador total de mensajes incrementado")
+		log.Printf("Contador total de mensajes incrementado en total_messages")
 	}
 }

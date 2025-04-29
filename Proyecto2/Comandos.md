@@ -11,6 +11,8 @@ Para subir imagenes a harbor
     docker build -f rabbitmq_writer/consumer/Dockerfile  -t 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest .     desde ./deployment1
     docker push 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest
 
+    deployment-consumer.yaml
+
 Para subir los .yml al cluster
     kubectl apply -f nombredel.yaml
 
@@ -47,3 +49,14 @@ Curl
 
     - http://go-deployment1.34.122.73.35.nip.io/status
     - curl http://go-deployment1.34.122.73.35.nip.io/health
+
+
+
+
+Conexion con valkey
+
+    kubectl port-forward -n proyecto2 svc/valkey-service 6380:6379
+
+    En otra consola
+
+        redis-cli -h localhost -p 6380
