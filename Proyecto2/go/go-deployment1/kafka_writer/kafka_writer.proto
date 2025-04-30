@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package kafka_writer;
+
+option go_package = "./kafka_writer";
+
+service KafkaWriter {
+  rpc PublishMessage (WeatherTweet) returns (PublishResponse);
+}
+
+message WeatherTweet {
+  string description = 1;
+  string country = 2;
+  string weather = 3;
+}
+
+message PublishResponse {
+  string message = 1;
+}

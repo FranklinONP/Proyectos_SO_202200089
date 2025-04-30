@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+  namespace: proyecto2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: kafka-consumer
+    spec:
+      imagePullSecrets:
+      - name: harbor-credentials
+      containers:
+      - name: kafka-consumer
+        image: 34.135.173.147.nip.io/proyecto2/kafka-consumer:latest
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-consumer-service
+  namespace: proyecto2
+spec:
+  ports:
+  - port: 50051
+    targetPort: 50051
+  selector:
+    app: kafka-consumer

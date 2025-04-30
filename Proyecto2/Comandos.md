@@ -8,11 +8,28 @@ Para subir imagenes a harbor
     docker build -t 34.135.173.147.nip.io/proyecto2/rabbitmq-writer:latest .
     docker push 34.135.173.147.nip.io/proyecto2/rabbitmq-writer:latest
 
-    docker build -f rabbitmq_writer/consumer/Dockerfile  -t 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest .     desde ./deployment1
+==========================================================================================================
+RABBIT CONSUMER
+
+desde ./deployment1
+    docker build -f rabbitmq_writer/consumer/Dockerfile  -t 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest .     
     docker push 34.135.173.147.nip.io/proyecto2/rabbitmq-consumer:latest
 
     deployment-consumer.yaml
+===========================================================================================================
+KAFKA WRITEN
 
+    docker build -f kafka_writer/server/Dockerfile -t 34.135.173.147.nip.io/proyecto2/kafka-writer:latest .     
+    docker push 34.135.173.147.nip.io/proyecto2/kafka-writer:latest
+
+===========================================================================================================
+KAFKA CONSUMER
+
+    docker build -f kafka_writer/consumer/Dockerfile -t 34.135.173.147.nip.io/proyecto2/kafka-consumer:latest .     
+    docker push 34.135.173.147.nip.io/proyecto2/kafka-consumer:latest
+
+============================================================================================================
+===========================================================================================================
 Para subir los .yml al cluster
     kubectl apply -f nombredel.yaml
 
@@ -60,3 +77,14 @@ Conexion con valkey
     En otra consola
 
         redis-cli -h localhost -p 6380
+
+
+
+
+
+
+===========================================================
+Pods
+kubectl get pods -n proyecto2
+===========================================================
+ 

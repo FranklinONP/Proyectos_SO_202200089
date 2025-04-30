@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	pb "go-deployment1/rabbitmq_writer"
+	pbKafka "go-deployment1/kafka_writer"
+	pbRabbit "go-deployment1/rabbitmq_writer"
 	"google.golang.org/grpc"
 )
 
@@ -28,19 +29,6 @@ type ApiResponse struct {
 // ValidWeatherTypes lista de climas válidos
 var ValidWeatherTypes = []string{"Lluvioso", "Nublado", "Soleado"}
 
-// publishToKafka simula la publicación en Kafka
-func publishToKafka(ctx context.Context, req *pb.WeatherTweet) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-		log.Printf("Simulando publicación en Kafka: Description=%s, Country=%s, Weather=%s",
-			req.Description, req.Country, req.Weather)
-		// Aquí iría la lógica real para publicar en Kafka
-		return nil
-	}
-}
-
 // isValidWeather verifica si el clima es válido
 func isValidWeather(weather string) bool {
 	for _, w := range ValidWeatherTypes {
@@ -53,13 +41,20 @@ func isValidWeather(weather string) bool {
 
 func main() {
 	// Conectar al gRPC Server (RabbitMQ Writer)
-	conn, err := grpc.Dial("rabbitmq-writer-service:50051", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(5*time.Second))
+	rabbitConn, err := grpc.Dial("rabbitmq-writer-service:50051", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(5*time.Second))
 	if err != nil {
-		log.Fatalf("Error al conectar al gRPC Server: %v", err)
+		log.Fatalf("Error al conectar al gRPC Server de RabbitMQ: %v", err)
 	}
-	defer conn.Close()
+	defer rabbitConn.Close()
+	rabbitClient := pbRabbit.NewRabbitMQWriterClient(rabbitConn)
 
-	rabbitClient := pb.NewRabbitMQWriterClient(conn)
+	// Conectar al gRPC Server (Kafka Writer)
+	kafkaConn, err := grpc.Dial("kafka-writer-service:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(5*time.Second))
+	if err != nil {
+		log.Fatalf("Error al conectar al gRPC Server de Kafka: %v", err)
+	}
+	defer kafkaConn.Close()
+	kafkaClient := pbKafka.NewKafkaWriterClient(kafkaConn)
 
 	// Configurar el puerto desde una variable de entorno
 	port := os.Getenv("PORT")
@@ -96,7 +91,7 @@ func main() {
 		}
 
 		// Crear el mensaje gRPC
-		req := &pb.WeatherTweet{
+		req := &pbRabbit.WeatherTweet{
 			Description: tweet.Description,
 			Country:     tweet.Country,
 			Weather:     tweet.Weather,
@@ -107,7 +102,7 @@ func main() {
 		defer cancel()
 
 		// Publicar en RabbitMQ usando gRPC
-		resp, err := rabbitClient.PublishMessage(ctx, req)
+		respRabbit, err := rabbitClient.PublishMessage(ctx, req)
 		if err != nil {
 			log.Printf("Error al publicar en RabbitMQ: %v", err)
 			c.JSON(http.StatusInternalServerError, ApiResponse{
@@ -115,16 +110,22 @@ func main() {
 			})
 			return
 		}
-		log.Printf("Respuesta de RabbitMQ Writer: %s", resp.Message)
+		log.Printf("Respuesta de RabbitMQ Writer: %s", respRabbit.Message)
 
-		// Publicar en Kafka (simulado por ahora)
-		if err := publishToKafka(ctx, req); err != nil {
+		// Publicar en Kafka usando gRPC
+		respKafka, err := kafkaClient.PublishMessage(ctx, &pbKafka.WeatherTweet{
+			Description: req.Description,
+			Country:     req.Country,
+			Weather:     req.Weather,
+		})
+		if err != nil {
 			log.Printf("Error al publicar en Kafka: %v", err)
 			c.JSON(http.StatusInternalServerError, ApiResponse{
 				Message: "Error al procesar el tweet en Kafka",
 			})
 			return
 		}
+		log.Printf("Respuesta de Kafka Writer: %s", respKafka.Message)
 
 		log.Printf("Tweet procesado correctamente: %+v", tweet)
 		c.JSON(http.StatusOK, ApiResponse{Message: "Tweet procesado correctamente"})
