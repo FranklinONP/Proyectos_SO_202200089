@@ -119,3 +119,8 @@ Para limpiar base de datos
     kubectl port-forward -n proyecto2 svc/redis-service 6381:6379 &
 
     redis-cli -h localhost -p 6381 FLUSHDB
+
+
+
+    CURL solito para verficiar que si funciona nicee sin el locus
+    curl -v http://rust-api.34.122.73.35.nip.io/process -X POST -H "Content-Type: application/json" -d '{"description":"Soleado en GT 1","country":"GT","weather":"Soleado"}'
