@@ -88,3 +88,34 @@ Pods
 kubectl get pods -n proyecto2
 ===========================================================
  
+# 1. Instalar pipx si no lo tienes
+sudo apt install pipx
+pipx ensurepath
+
+# 2. Instalar Locust
+pipx install locust
+
+ correr Locust
+    locust -f locustfile.py --host=http://rust-api.34.122.73.35.nip.io --users 100 --spawn-rate 10 --run-time 60s --headless --stop-after 10000
+
+
+Aqui manda durante 10 segundos
+
+    locust -f locustfile.py \
+  --host=http://rust-api.34.122.73.35.nip.io \
+  --users 100 \
+  --spawn-rate 10 \
+  --run-time 60s \
+  --headless
+
+
+Para limpiar base de datos 
+    kubectl port-forward -n proyecto2 svc/valkey-service 6380:6379 &
+
+    redis-cli -h localhost -p 6380 FLUSHDB
+
+    ==============================================
+
+    kubectl port-forward -n proyecto2 svc/redis-service 6381:6379 &
+
+    redis-cli -h localhost -p 6381 FLUSHDB

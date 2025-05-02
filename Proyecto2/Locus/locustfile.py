@@ -1,20 +1,32 @@
-from locust import HttpUser, task, between, events
+import random
+from locust import HttpUser, task, between
 
-class WeatherAPIUser(HttpUser):
-    wait_time = between(1, 2)
-    total_requests = 0
+# Lista de países y climas válidos
+COUNTRIES = ["USA", "GT", "MX", "CR", "RD", "NZ", "ES", "FR", "DE", "IT", "PT", "BR", "AR"]
+WEATHERS = ["Lluvioso", "Nublado", "Soleado"]
+
+class WeatherUser(HttpUser):
+    # Tiempo de espera entre tareas (en segundos)
+    wait_time = between(0.1, 0.5)
 
     @task
-    def post_weather_tweet(self):
-        if self.total_requests < 3:
-            self.client.post("/input", json={
-                "description": "Está lloviendo",
-                "country": "GT",
-                "weather": "Lluvioso"
-            })
-            self.total_requests += 1
-            if self.total_requests == 3:
-                self.environment.runner.quit()
+    def send_weather_tweet(self):
+        # Generar datos aleatorios
+        location_number = random.randint(1, 100)  # Número aleatorio para la descripción
+        description = f"Clima en {random.choice(COUNTRIES)} {location_number}"
+        country = random.choice(COUNTRIES)
+        weather = random.choice(WEATHERS)
 
-    def on_start(self):
-        self.total_requests = 0
+        # Crear el payload
+        payload = {
+            "description": description,
+            "country": country,
+            "weather": weather
+        }
+
+        # Enviar la solicitud POST
+        self.client.post(
+            "/process",
+            json=payload,
+            headers={"Content-Type": "application/json"}
+        )
